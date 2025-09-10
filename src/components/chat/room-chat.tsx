@@ -9,6 +9,7 @@ import { Badge } from '@/components/ui/badge';
 import { useSocket } from '@/lib/hooks/use-socket';
 import { apiCall } from '@/lib/hooks/use-api';
 import { cn } from '@/lib/utils';
+import { UserAvatar } from '@/components/ui/user-avatar';
 
 interface Message {
   _id: string;
@@ -19,6 +20,7 @@ interface Message {
   content: string;
   type: 'text' | 'system';
   createdAt: string;
+  senderAvatar?: string;
 }
 
 interface RoomChatProps {
@@ -36,6 +38,7 @@ export function RoomChat({ roomId, currentUser, roomName }: RoomChatProps) {
   const [isLoading, setIsLoading] = useState(true);
   const [isSending, setIsSending] = useState(false);
   const [typingTimeout, setTypingTimeout] = useState<NodeJS.Timeout | null>(null);
+  const [userAvatars, setUserAvatars] = useState<{ [userId: number]: string }>({});
   const messagesEndRef = useRef<HTMLDivElement>(null);
   
   const { 
@@ -51,6 +54,25 @@ export function RoomChat({ roomId, currentUser, roomName }: RoomChatProps) {
     stopTyping 
   } = useSocket();
 
+  // Charger les avatars des utilisateurs
+  const loadUserAvatar = async (userId: number) => {
+    if (userAvatars[userId] !== undefined) return; // Déjà chargé ou en cours
+    
+    try {
+      const response = await fetch(`/api/users/${userId}`);
+      if (response.ok) {
+        const userData = await response.json();
+        setUserAvatars(prev => ({
+          ...prev,
+          [userId]: userData.avatar || null
+        }));
+      }
+    } catch (error) {
+      console.error('Erreur chargement avatar:', error);
+      setUserAvatars(prev => ({ ...prev, [userId]: null }));
+    }
+  };
+
   // Charger l'historique des messages
   useEffect(() => {
     const loadMessages = async () => {
@@ -62,6 +84,14 @@ export function RoomChat({ roomId, currentUser, roomName }: RoomChatProps) {
         }>(`/api/messages/${roomId}`);
         
         setMessages(response.messages || []);
+        
+        // Charger les avatars des utilisateurs uniques
+        const uniqueUserIds = [...new Set(response.messages?.map(m => m.senderId) || [])];
+        uniqueUserIds.forEach(userId => {
+          if (userId !== currentUser.id) {
+            loadUserAvatar(userId);
+          }
+        });
       } catch (error) {
         console.error('Erreur chargement messages:', error);
       } finally {
@@ -70,7 +100,7 @@ export function RoomChat({ roomId, currentUser, roomName }: RoomChatProps) {
     };
 
     loadMessages();
-  }, [roomId, setMessages]);
+  }, [roomId, setMessages, currentUser.id]);
 
   // Rejoindre la room
   useEffect(() => {
@@ -262,11 +292,11 @@ export function RoomChat({ roomId, currentUser, roomName }: RoomChatProps) {
                             !showAvatar && "invisible"
                           )}>
                             {!isCurrentUser && showAvatar && (
-                              <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center">
-                                <span className="text-xs font-medium text-blue-600">
-                                  {message.senderName.charAt(0).toUpperCase()}
-                                </span>
-                              </div>
+                              <UserAvatar
+                                src={userAvatars[message.senderId]}
+                                fallbackText={message.senderName}
+                                size="sm"
+                              />
                             )}
                           </div>
 

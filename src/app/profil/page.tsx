@@ -9,6 +9,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { useApi, apiCall } from '@/lib/hooks/use-api';
+import { AvatarUpload } from '@/components/ui/avatar-upload';
 
 interface UserProfile {
   id: number;
@@ -19,6 +20,7 @@ interface UserProfile {
   lastName?: string;
   birthDate?: string;
   mairieName?: string;
+  avatar?: string;
   address?: {
     streetNumber: string;
     streetName: string;
@@ -67,6 +69,26 @@ export default function ProfilPage() {
   const handleCancel = () => {
     setIsEditing(false);
     setEditData(profile?.profile || {});
+  };
+
+  const handleAvatarChange = async (avatar: string) => {
+    try {
+      const token = localStorage.getItem('token');
+      await fetch('/api/profile/avatar', {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({ avatar })
+      });
+      
+      // Mettre à jour les données locales
+      setEditData({ ...editData, avatar });
+      refetch();
+    } catch (error) {
+      console.error('Erreur mise à jour avatar:', error);
+    }
   };
 
   const handleSave = async () => {
@@ -148,7 +170,21 @@ export default function ProfilPage() {
           </div>
         </div>
 
-        <div className="grid gap-6 md:grid-cols-2">
+        <div className="grid gap-6 md:grid-cols-3">
+          <Card>
+            <CardHeader>
+              <CardTitle>Photo de profil</CardTitle>
+            </CardHeader>
+            <CardContent className="flex flex-col items-center">
+              <AvatarUpload
+                currentAvatar={editData.avatar}
+                onAvatarChange={handleAvatarChange}
+                size="xl"
+                disabled={loading}
+              />
+            </CardContent>
+          </Card>
+
           <Card>
             <CardHeader>
               <CardTitle>Informations générales</CardTitle>

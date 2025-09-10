@@ -13,6 +13,7 @@ import {
   Plus 
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { UserAvatar } from '@/components/ui/user-avatar';
 
 interface User {
   id: number;
@@ -23,13 +24,32 @@ interface User {
 export function BottomBar() {
   const pathname = usePathname();
   const [user, setUser] = useState<User | null>(null);
+  const [userAvatar, setUserAvatar] = useState<string | null>(null);
 
   useEffect(() => {
     const userData = localStorage.getItem('user');
     if (userData) {
       setUser(JSON.parse(userData));
+      loadUserAvatar();
     }
   }, []);
+
+  const loadUserAvatar = async () => {
+    try {
+      const token = localStorage.getItem('token');
+      const response = await fetch('/api/profile/avatar', {
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      });
+      if (response.ok) {
+        const data = await response.json();
+        setUserAvatar(data.avatar);
+      }
+    } catch (error) {
+      console.error('Erreur chargement avatar:', error);
+    }
+  };
 
   if (!user) {
     return null;
@@ -61,6 +81,7 @@ export function BottomBar() {
       href: '/profil',
       label: 'Profil',
       icon: User,
+      isProfile: true,
     },
   ];
 
@@ -90,6 +111,7 @@ export function BottomBar() {
       href: '/profil',
       label: 'Profil',
       icon: User,
+      isProfile: true,
     },
   ];
 
@@ -120,9 +142,17 @@ export function BottomBar() {
                   ? "w-12 h-12 bg-primary text-primary-foreground rounded-full shadow-lg -mt-6" 
                   : "w-6 h-6"
               )}>
-                <Icon className={cn(
-                  item.isCenter ? "w-6 h-6" : "w-5 h-5"
-                )} />
+                {item.isProfile ? (
+                  <UserAvatar
+                    src={userAvatar}
+                    fallbackText={user.email}
+                    size="sm"
+                  />
+                ) : (
+                  <Icon className={cn(
+                    item.isCenter ? "w-6 h-6" : "w-5 h-5"
+                  )} />
+                )}
               </div>
               <span className={cn(
                 "text-xs font-medium truncate max-w-16",

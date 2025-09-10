@@ -29,6 +29,7 @@ export const initSQLiteDatabase = () => {
       street_name TEXT,
       postal_code TEXT,
       city TEXT,
+      avatar TEXT,
       created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
       updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
       FOREIGN KEY (user_id) REFERENCES users (id) ON DELETE CASCADE
@@ -46,6 +47,19 @@ export const initSQLiteDatabase = () => {
       FOREIGN KEY (user_id) REFERENCES users (id)
     );
 
+    -- Ajouter la colonne avatar si elle n'existe pas
+    PRAGMA table_info(user_profiles);
+  `);
+  
+  // Vérifier si la colonne avatar existe, sinon l'ajouter
+  const columns = db.prepare("PRAGMA table_info(user_profiles)").all();
+  const avatarExists = columns.some((col: any) => col.name === 'avatar');
+  
+  if (!avatarExists) {
+    db.exec("ALTER TABLE user_profiles ADD COLUMN avatar TEXT;");
+  }
+  
+  db.exec(`
     CREATE INDEX IF NOT EXISTS idx_users_email ON users(email);
     CREATE INDEX IF NOT EXISTS idx_users_verification_token ON users(verification_token);
     CREATE INDEX IF NOT EXISTS idx_users_reset_token ON users(reset_token);
