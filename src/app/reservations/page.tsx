@@ -39,9 +39,24 @@ export default function ReservationsPage() {
     return `/api/bookings?${params.toString()}`;
   };
 
+  const [shouldFetch, setShouldFetch] = useState(false);
+
+  useEffect(() => {
+    if (user) {
+      setShouldFetch(true);
+    }
+  }, [user]);
+
   const { data, loading, error, refetch } = useApi<PaginatedResponse<Booking>>(
-    user ? buildUrl() : ''
+    shouldFetch ? buildUrl() : ''
   );
+
+  useEffect(() => {
+    if (statusFilter !== 'all') {
+      setPage(1);
+      setShouldFetch(user !== null);
+    }
+  }, [statusFilter, user]);
 
   const handleStatusChange = (bookingId: string, newStatus: string) => {
     refetch();

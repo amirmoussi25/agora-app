@@ -5,15 +5,16 @@ import { BottomBar } from '@/components/navigation/bottom-bar';
 
 interface MainLayoutProps {
   children: React.ReactNode;
+  showBottomBar?: boolean;
 }
 
-export function MainLayout({ children }: MainLayoutProps) {
+export function MainLayout({ children, showBottomBar = true }: MainLayoutProps) {
   return (
     <div className="min-h-screen bg-background">
-      <main className="pb-20">
+      <main className={showBottomBar ? "pb-20" : ""}>
         {children}
       </main>
-      <BottomBar />
+      {showBottomBar && <BottomBar />}
     </div>
   );
 }

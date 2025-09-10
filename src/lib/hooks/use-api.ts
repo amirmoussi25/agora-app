@@ -16,7 +16,7 @@ function getAuthHeader(): HeadersInit {
 
 export function useApi<T>(url: string): ApiResponse<T> {
   const [data, setData] = useState<T | null>(null);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(!!url);
   const [error, setError] = useState<string | null>(null);
 
   const fetchData = async () => {
@@ -46,7 +46,13 @@ export function useApi<T>(url: string): ApiResponse<T> {
   };
 
   useEffect(() => {
-    fetchData();
+    if (url) {
+      fetchData();
+    } else {
+      setLoading(false);
+      setData(null);
+      setError(null);
+    }
   }, [url]);
 
   return { data, loading, error, refetch: fetchData };

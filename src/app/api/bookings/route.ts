@@ -78,11 +78,14 @@ export async function POST(request: NextRequest) {
       eventType,
       startDate,
       endDate,
-      guestCount,
-      specialRequests
+      startTime,
+      endTime,
+      expectedAttendees,
+      eventDescription,
+      totalPrice
     } = await request.json();
 
-    if (!roomId || !eventType || !startDate || !endDate || !guestCount) {
+    if (!roomId || !eventType || !startDate || !endDate || !startTime || !endTime || !expectedAttendees) {
       return NextResponse.json(
         { error: 'Tous les champs obligatoires doivent être remplis' },
         { status: 400 }
@@ -97,15 +100,15 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    if (guestCount > room.capacity) {
+    if (expectedAttendees > room.capacity) {
       return NextResponse.json(
         { error: 'Nombre d\'invités supérieur à la capacité de la salle' },
         { status: 400 }
       );
     }
 
-    const start = new Date(startDate);
-    const end = new Date(endDate);
+    const start = new Date(startDate + 'T' + startTime);
+    const end = new Date(endDate + 'T' + endTime);
 
     if (start >= end) {
       return NextResponse.json(
@@ -129,8 +132,8 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const hours = Math.ceil((end.getTime() - start.getTime()) / (1000 * 60 * 60));
-    const totalPrice = hours * room.price;
+    const days = Math.ceil((end.getTime() - start.getTime()) / (1000 * 60 * 60 * 24));
+    const calculatedPrice = days * room.price;
 
     const booking = new Booking({
       userId: user.userId,
@@ -138,9 +141,9 @@ export async function POST(request: NextRequest) {
       eventType,
       startDate: start,
       endDate: end,
-      guestCount,
-      totalPrice,
-      specialRequests
+      guestCount: expectedAttendees,
+      totalPrice: totalPrice || calculatedPrice,
+      specialRequests: eventDescription
     });
 
     await booking.save();
@@ -149,7 +152,7 @@ export async function POST(request: NextRequest) {
       { 
         message: 'Réservation créée avec succès',
         booking,
-        totalPrice
+        totalPrice: totalPrice || calculatedPrice
       },
       { status: 201 }
     );

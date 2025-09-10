@@ -5,13 +5,14 @@ import { useRouter } from 'next/navigation';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm, useFieldArray } from 'react-hook-form';
 import { z } from 'zod';
-import { Plus, X, Upload, Loader2 } from 'lucide-react';
+import { Plus, X, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
+import { ImageUpload } from '@/components/ui/image-upload';
 import { apiCall } from '@/lib/hooks/use-api';
 import { Room } from '@/lib/types/room';
 
@@ -273,15 +274,12 @@ export function RoomForm({ room, onSuccess }: RoomFormProps) {
           <CardTitle>Photos</CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="border-2 border-dashed border-muted-foreground/25 rounded-lg p-8 text-center">
-            <Upload className="w-12 h-12 mx-auto text-muted-foreground" />
-            <p className="mt-4 text-sm text-muted-foreground">
-              Fonctionnalité photos à venir
-            </p>
-            <p className="text-xs text-muted-foreground">
-              JPG, PNG jusqu'à 10MB chacune
-            </p>
-          </div>
+          <ImageUpload
+            images={form.watch('images')}
+            onChange={(images) => form.setValue('images', images)}
+            maxImages={5}
+            disabled={isLoading}
+          />
         </CardContent>
       </Card>
 

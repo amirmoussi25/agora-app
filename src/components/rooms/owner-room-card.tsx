@@ -38,8 +38,8 @@ export function OwnerRoomCard({ room, onEdit, onDelete }: OwnerRoomCardProps) {
     <Card className="overflow-hidden">
       <div className="aspect-video bg-muted relative">
         {room.images && room.images.length > 0 ? (
-          <img 
-            src={room.images[0]} 
+          <img
+            src={room.images[0]}
             alt={room.name}
             className="w-full h-full object-cover"
           />

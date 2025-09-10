@@ -11,6 +11,7 @@ export interface IBooking extends Document {
   totalPrice: number;
   status: 'pending' | 'confirmed' | 'cancelled' | 'completed';
   paymentStatus: 'pending' | 'paid' | 'failed' | 'refunded';
+  paymentIntentId?: string;
   specialRequests?: string;
   createdAt: Date;
   updatedAt: Date;
@@ -38,6 +39,7 @@ const bookingSchema = new Schema<IBooking>({
     enum: ['pending', 'paid', 'failed', 'refunded'],
     default: 'pending'
   },
+  paymentIntentId: { type: String },
   specialRequests: { type: String }
 }, {
   timestamps: true

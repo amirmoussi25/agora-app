@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { Heart, Loader2 } from 'lucide-react';
 import { MainLayout } from '@/components/layout/main-layout';
@@ -9,13 +9,31 @@ import { Button } from '@/components/ui/button';
 import { useApi } from '@/lib/hooks/use-api';
 import { Room, PaginatedResponse } from '@/lib/types/room';
 
+interface User {
+  id: number;
+  email: string;
+  userType: 'client' | 'mairie';
+}
+
 export default function FavorisPage() {
   const router = useRouter();
+  const [user, setUser] = useState<User | null>(null);
   const [page, setPage] = useState(1);
   const [removedFavorites, setRemovedFavorites] = useState<Set<string>>(new Set());
+  const [shouldFetch, setShouldFetch] = useState(false);
+
+  useEffect(() => {
+    const userData = localStorage.getItem('user');
+    if (userData) {
+      setUser(JSON.parse(userData));
+      setShouldFetch(true);
+    } else {
+      router.push('/login');
+    }
+  }, [router]);
 
   const { data, loading, error, refetch } = useApi<PaginatedResponse<Room>>(
-    `/api/favorites?page=${page}&limit=10`
+    shouldFetch ? `/api/favorites?page=${page}&limit=10` : ''
   );
 
   const handleFavoriteToggle = (roomId: string, isFavorite: boolean) => {
@@ -34,6 +52,19 @@ export default function FavorisPage() {
       setPage(page + 1);
     }
   };
+
+  if (!user) {
+    return (
+      <MainLayout>
+        <div className="container mx-auto px-4 py-6">
+          <div className="flex items-center justify-center py-12">
+            <Loader2 className="w-6 h-6 animate-spin" />
+            <span className="ml-2">Chargement...</span>
+          </div>
+        </div>
+      </MainLayout>
+    );
+  }
 
   if (loading && page === 1) {
     return (

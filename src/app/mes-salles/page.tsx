@@ -20,6 +20,7 @@ export default function MesSallesPage() {
   const [user, setUser] = useState<User | null>(null);
   const [page, setPage] = useState(1);
   const [deletedRooms, setDeletedRooms] = useState<Set<string>>(new Set());
+  const [shouldFetch, setShouldFetch] = useState(false);
 
   useEffect(() => {
     const userData = localStorage.getItem('user');
@@ -30,13 +31,14 @@ export default function MesSallesPage() {
         return;
       }
       setUser(parsedUser);
+      setShouldFetch(true);
     } else {
       router.push('/login');
     }
   }, [router]);
 
   const { data, loading, error, refetch } = useApi<PaginatedResponse<Room>>(
-    user ? `/api/rooms/owner?page=${page}&limit=10` : ''
+    shouldFetch ? `/api/rooms/owner?page=${page}&limit=10` : ''
   );
 
   const handleEdit = (room: Room) => {
