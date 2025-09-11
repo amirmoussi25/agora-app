@@ -3,7 +3,7 @@
 import React, { useEffect, useState } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
-import { CheckCircle, XCircle, Loader2, Panda } from 'lucide-react';
+import { CheckCircle, XCircle, Loader2, Rabbit } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 
@@ -24,7 +24,7 @@ export default function VerifyEmailPage() {
       }
 
       try {
-        const response = await fetch('/api/auth/verify', {
+        const response = await fetch('/api/auth/verify-email', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json'
@@ -57,7 +57,7 @@ export default function VerifyEmailPage() {
           <div className="flex flex-col items-center gap-2">
             <Link href="/" className="flex flex-col items-center gap-2 font-medium">
               <div className="flex size-8 items-center justify-center rounded-md">
-                <Panda className="size-6 text-primary" />
+                <Rabbit className="size-6" />
               </div>
               <span className="sr-only">Agora</span>
             </Link>

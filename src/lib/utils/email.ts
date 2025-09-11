@@ -1,12 +1,22 @@
 import nodemailer from 'nodemailer';
 
 const transporter = nodemailer.createTransport({
+  // Pour développement : Mailtrap (emails de test)
   host: 'sandbox.smtp.mailtrap.io',
   port: 2525,
   auth: {
     user: process.env.MAILTRAP_USER,
     pass: process.env.MAILTRAP_PASS
   }
+  
+  // Pour recevoir de vrais emails, décommentez ceci et ajoutez vos variables d'environnement :
+  /*
+  service: 'gmail',
+  auth: {
+    user: process.env.GMAIL_USER, // votre.email@gmail.com
+    pass: process.env.GMAIL_APP_PASSWORD // mot de passe d'application Gmail
+  }
+  */
 });
 
 export const sendVerificationEmail = async (email: string, token: string) => {
